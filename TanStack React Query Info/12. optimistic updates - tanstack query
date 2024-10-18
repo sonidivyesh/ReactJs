@@ -1,0 +1,126 @@
+// 11. Optimistic Updates
+	***** Usecase : It implies updating the state before performing a mutation under the assumption that nothing can go wrong. It is typically done yo give impression that your app is blazing fast. 
+	
+	
+	=> This takes three different callback functions.
+	1. onMutate: () => {} 
+		=> It receives same payloads that mutationFn receives, so here mutationFn: addPost & this addPost has payload (post) so mutationFn's payload is (post)
+		=> So here in onMutate we will write this (post) payload as (newPost)
+		
+		=> step 1 : Now firts we have to cancle any outgoing re-fetches so that do not override our optimistic update.
+				 => We will do this by using queryClient instance & will access cancelQueries fucntion which will take queryKey ["posts"] as firts argument.
+				 => This operation is asynchronous opration so we have to put async keyword at front.
+				 
+		=> step 2 : Now we have to get the hold of current query data before we make any update, this will help us to roll back in-case if mutation fails
+				 => To get the hold of the current query data we will use getQueryData method from queryClient instance & this will also take queryKey ["posts"] as a first argument.
+				 
+		=> step 3 : To add this data into queryKey ["Posts"] cache we will use setQueryData function in this first parameter will be the queryKey ["posts"] which we want to add.
+				 => And second parameter will be a function which will have oldQueryData, so we will copy old data using spread operator ...oldQueryData & add new data after old data.
+				 
+		
+	2. onError: () => {}
+	3. onSettled: () => {}
+	
+	
+	
+	### example
+	import React, { useState } from 'react'
+	import { useQuery, useMutation } from '@tanstack/react-query'
+	import axios from 'axios'
+	import { Link } from 'react-router-dom'
+	import { useQueryClient } from '@tanstack/react-query'
+
+	//GET method
+	const fetchPosts = () => {
+		return axios.get("http://localhost:4000/posts");
+	}
+
+	// POST method
+	const addPost = (post) => {
+		return axios.post("http://localhost:4000/posts", post);
+	}
+
+
+	export default function PostsRQ () {
+
+		const [title, setTitle] = useState("");
+		const [body, setBody] = useState("");
+		
+		const queryClient = useQueryClient()
+
+		const { data, isLoading, isError, error, isFetching } = useQuery({
+			queryKey: ["posts"],
+			queryFn: fetchPosts
+		})
+
+		const { mutate } = useMutation({
+			mutationFn: addPost,
+		    onMutate: async (newPost) => {
+				await queryClient.cancelQueries(["posts"]);
+				const previousPostData = queryClient.getQueryData(["posts"]);
+
+				queryClient.setQueryData(["posts"], (oldQueryData) => {
+					return {
+						...oldQueryData,
+						data: [...oldQueryData.data, { ...newPost, id: String(oldQueryData?.data?.length + 1) }]
+					}
+				})
+
+				return {
+					previousPostData
+				}
+			},
+			onError: (_error, _post, context) => {
+				queryClient.setQueryData(["posts"], context.previousPostData)
+			},
+			onSettled: () => {
+				queryClient.invalidateQueries(["posts"]);
+			}
+		});
+		  
+		  
+		const handleSubmit = (e) => {
+			e.preventDefault();
+
+			const post = { title, body }
+
+			mutate(post);
+			setTitle("");
+			setBody("");
+		}
+
+		if (isLoading) {
+			return <div>Page is loading...</div>
+		}
+
+		if (isError) {
+			return <div>{error.message}</div>
+		}
+
+
+		return (
+			<div>
+				<form onSubmit={handleSubmit}>
+					<input
+						onChange={(e) => setTitle(e.target.value)}
+						placeholder='Enter post title'
+						value={title}
+					/>
+					<input
+						onChange={(e) => setBody(e.target.value)}
+						placeholder='Enter post body'
+						value={body}
+					/>
+					<button type='submit'>Post</button>
+				</form>
+				{data?.data.map(post => (
+					<Link key={post.id} to={`/posts/${post.id}`}>
+						<div key={post.id}>
+							<h3>{post.title}</h3>
+							<p>{post.body}</p>
+						</div>
+					</Link>
+				))}
+			</div>
+		);
+	}

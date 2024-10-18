@@ -1,0 +1,185 @@
+// 8. Infinite scrolling 1
+	***** Usecase : To load more data when we reach at bottom 
+	
+	
+	=> 1. With load more button 
+	=> 2. Without load more button (like Instagram does)
+	
+	
+	=> In this we won't use useQuery hook, instead we will use useInfiniteQuery hook
+	
+	
+	
+	step 1 => When we use useInfiniteQuery hook then queryFn always receives one object and this object will have property {pageParam}
+		   => pageParam : It denotes the page number, whether we want to first page or second page
+	
+	step 2 => We will use same API like we have used in pagination (`.../?_limit=${limit}&_page=${pageId}`) but instead of passing pageId, here we will pass pageParam like this => (`.../?_limit=${limit}&_page=${pageParam}`)
+	
+	step 3 => we need to tell react-query that first page start from 1, so we use property "initialPageParam" & pass it's value 1 => (initialPageParam: 1)
+	
+	step 4 => getNextPageParam method:
+				=> It only has one main function -> it is to calculate next ppage number.
+				=> If the next page number does not exist, then it should return "undefined"
+				=> It always has two parameters:
+					1. lastPage => It contains the entire API response of the current page, most recent data fetch
+					2. allPages => It is an array of objects, each object is the entire API response of all past data fetches
+				=> If API supports pagination along with the resonse, it gives us the data of next page otherwise we have to calculate it manually by using getNextPageParam method.
+		
+		
+	
+	=> This is my json data
+	{
+		"fruits": [
+			{ "id": "1", "name": "Apple" },
+			{ "id": "2", "name": "Banana" },
+			{ "id": "3", "name": "Orange" },
+			{ "id": "4", "name": "Strawberry" },
+			{ "id": "5", "name": "Mango" },
+			{ "id": "6", "name": "Pineapple" },
+			{ "id": "7", "name": "Grapes" },
+			{ "id": "8", "name": "Watermelon" },
+			{ "id": "9", "name": "Blueberry" },
+			{ "id": "10", "name": "Cherry" },
+			{ "id": "11", "name": "Peach" },
+			{ "id": "12", "name": "Plum" },
+			{ "id": "13", "name": "Kiwi" },
+			{ "id": "14", "name": "Papaya" },
+			{ "id": "15", "name": "Pomegranate" },
+			{ "id": "16", "name": "Lemon" },
+			{ "id": "17", "name": "Coconut" },
+			{ "id": "18", "name": "Pear" },
+			{ "id": "19", "name": "Guava" },
+			{ "id": "20", "name": "Lychee" },
+		],
+		"totalItems": 20
+	}
+	
+	=> Make sure your API gives totalItems
+	
+	
+	==========================================================================================================================================
+	
+	### example (With button):
+	import { useInfiniteQuery } from '@tanstack/react-query'
+	import axios from 'axios'
+	import React, { useEffect } from 'react'
+	
+	const limit = 5; // 5 is the limit per page
+
+	const fetchFruits = ({ pageParam }) => {
+		return axios.get(`http://localhost:4000/fruits/?_limit=${limit}&_page=${pageParam}`); // in infinit scrolling we will pass static limit
+	}
+
+	export default function InfiniteQueries() {
+
+		const { data, isLoading, isError, error, fetchNextPage, hasNextPage } = useInfiniteQuery({
+			queryKey: ["fruits"],
+			queryFn: fetchFruits, // because we are using useInfiniteQuery hook this queryFn will always have object property {pageParam}
+			initialPageParam: 1, // initial starts page from 1
+			getNextPageParam: (lastPage, allPages) => {
+				
+				// lastPage contains the current page data, so use it to calculate total pages dynamically
+				const totalItems = lastPage?.data.totalItems; // Assuming totalItems is returned in the API response
+				const totalPages = Math.ceil(totalItems / limit);
+				
+				if (allPages.length < totalPages) {
+					return allPages.length + 1
+				} else {
+					return undefined
+				}
+			}
+		})
+
+		if (isLoading) {
+			return <h2>Page is Loading...</h2>
+		}
+
+		if (isError) {
+			return <h1>{error.message}</h1>
+		}
+
+		return (
+			<div>
+				{data?.pages?.map(page => {
+					return page?.data.map(fruit => {
+						return <div key={fruit.id}>{fruit.name}</div>
+					})
+				})}
+				<button disable={!hasNextPage} onClick={fetchNextPage}>Load more...</button>
+			</div>
+		)
+	}
+	
+	=> Here in button's onClick event we have to fetch data of next page. Fortunally useInfiniteQuery hook provides flag "fetchNextPage"
+	=> We have to disable or hide button when we reach the last page, so useInfiniteQuery hook provides another flag "hasNextPage"
+	
+	
+	
+	
+	==========================================================================================================================================
+	
+	
+	
+	
+	=> For infinit scrolling without load more button we will use package => react-intersection-observer (npm i react-intersection-observer)
+	=> useInfiniteQuery hook provides flag isFetchingNextPage so that we can show any text or loading icon when data us fethcing 
+	
+	### example (without button (like Instagram does)):
+	import { useInfiniteQuery } from '@tanstack/react-query'
+	import axios from 'axios'
+	import React, { useEffect } from 'react'
+	import { useInView } from "react-intersection-observer";
+	
+	const limit = 5; // 5 is the limit per page
+
+	const fetchFruits = ({ pageParam }) => {
+		return axios.get(`http://localhost:4000/fruits/?_limit=${limit}&_page=${pageParam}`); // in infinit scrolling we will pass static limit
+	}
+
+	export default function InfiniteQueries() {
+
+		const { data, isLoading, isError, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
+			queryKey: ["fruits"],
+			queryFn: fetchFruits, // because we are using useInfiniteQuery hook this queryFn will always have object property {pageParam}
+			initialPageParam: 1, // initial starts page from 1
+			getNextPageParam: (lastPage, allPages) => {
+				
+				// lastPage contains the current page data, so use it to calculate total pages dynamically
+				const totalItems = lastPage?.data.totalItems; // Assuming totalItems is returned in the API response
+				const totalPages = Math.ceil(totalItems / limit);
+				
+				if (allPages.length < totalPages) {
+					return allPages.length + 1
+				} else {
+					return undefined
+				}
+			}
+		})
+		
+		const { ref, inView } = useInView();
+		
+		useEffect(() => {
+			if (inView) {
+				fetchNextPage();
+			}
+		}, [fetchNextPage, inView])
+
+		if (isLoading) {
+			return <h2>Page is Loading...</h2>
+		}
+
+		if (isError) {
+			return <h1>{error.message}</h1>
+		}
+
+		return (
+			<div>
+				{data?.pages?.map(page => {
+					return page?.data.map(fruit => {
+						return <div key={fruit.id}>{fruit.name}</div>
+					})
+				})}
+				<div ref={ref}>{isFetchingNextPage && "Loading..."}</div>
+			</div>
+		)
+	}

@@ -1,0 +1,23 @@
+body{
+    height: 100vh;
+    position: relative;
+}
+
+.row{
+    max-width: 100%;
+}
+
+.header_navigation_footer{
+    border: 1px solid #000;
+    padding: 23px;
+    text-align: center;
+}
+
+.content{
+    border: 1px solid #000;
+    padding: 23px;
+    height: 35rem;
+    text-align: center;
+    display: grid;
+    place-content: center;
+}

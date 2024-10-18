@@ -1,0 +1,30 @@
+// 4. Polling
+	***** Usecase : If we need to make network request at regular intervals of time (ex: in tading applications like grow, zerodha)
+	
+	
+	=> react-query provides property "refetchInterval"
+	=> refetchInterval : here we mention time in milliseconds to tell react-query at what interval time period it haas to make new network request
+	
+	
+	### example: 
+	const { data, isLoading, isError, error, isFetching } = useQuery({
+		queryKey: ["posts"],
+		queryFn: return axios.get("http://localhost:4000/posts"),
+		refetchInterval: 1000 // 1second
+	})
+	
+	
+	=> now 'posts' api will be triggered at every 1 second interval
+	
+	
+	=> If user goes to another tab in browser then polling will be stopped, reqct-query will only poll data only when current tab is in-focus
+	=> If we want to poll data even though user in another tab then we have to use another property "refetchIntervalInBackground"
+	=> refetchIntervalInBackground : here we have to set this property true so that data will be fetched in background on regular interval even though user is on another tab in browser
+	
+	### example: 
+	const { data, isLoading, isError, error, isFetching } = useQuery({
+		queryKey: ["posts"],
+		queryFn: return axios.get("http://localhost:4000/posts"),
+		refetchInterval: 1000,
+		refetchIntervalInBackground: true // true
+	})

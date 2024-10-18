@@ -1,0 +1,30 @@
+// 2. Query cache
+	***** Usecase : To manage cache 
+	
+	
+	=> In react-query every cache results are by default cached for 5 minutes for the visited page's queryKey
+	=> And react-query relias on that cached results for sub-sequence requests
+	=> ex: If user has once visited '/posts' page then it's queryKey was ["posts"] then react quey will store this ["posts"] queryKey's page cache for 5 minutes
+	=> So within 5 minutes  if user visits this page again then it will set this page's isLoading = false & it won't show isLoading state.
+	
+	
+	=> useQuery also provides flag (isFetching): 
+		=> isFetching : within 5 minutes in background if data is changed then on UI it will first fetch cached data & then it will show newly fetched data 
+					ex: within 5 minutes when page loads again 
+							=> isLoading = false
+							=> isFetching = true // newly changed data is fetching
+						now data is fetched on UI
+							=> isLoading = false
+							=> isFetching = false // data is fetched
+	
+	
+	### example: 
+	const { data, isLoading, isError, error, isFetching } = useQuery({
+		queryKey: ["posts"],
+		queryFn: return axios.get("http://localhost:4000/posts"),
+	})
+	
+	console.log({isLoading, isFetching})
+					
+					
+	 

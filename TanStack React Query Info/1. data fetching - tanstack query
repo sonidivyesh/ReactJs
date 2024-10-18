@@ -1,0 +1,56 @@
+// tanstack react query provides useQuery hook
+
+// 1. Data fetching using useQuery hook
+	***** Usecase : To fetch data
+	
+	
+	=> useQuery provides four flags (data, isLoading, isError, error): 
+		=> data : data from API
+		=> isLoading : if data is not fetched yet then we can show loading 
+		=> isError : gives boolean true or false if error occured
+		=> error : gives exact error message
+
+	=> useQuery takes one argument as an Object which provides two properties:
+		1. queryKey: always an Array (always unique)
+				 ex: => queryKey: ["posts"] // if url is /posts
+					 => queryKey: ["posts", "1"] //if url is /posts/1
+					 => queryKey: ["posts", "1", "comments"] //if url is /posts/1/comments
+		2. queryFn: we can call an API or can call function here
+				 ex: => queryFn: return axios.get("http://localhost:4000/posts") // calling api
+					 => queryFn: fetcPosts // calling function directly
+
+
+
+	### example:
+	import { useQuery} from '@tanstack/react-query'
+
+	export default function PostRQ() {
+
+		const { data, isLoading, isError, error } = useQuery({
+			queryKey: ["posts"],
+			queryFn: return axios.get("http://localhost:4000/posts")
+		})
+	
+		// if data is not fetched yet then it will show loading state
+		if (isLoading) {
+			return <div>Page is loading...</div>
+		}
+	
+		// if error occured then it will show error message
+		if (isError) {
+			return <div>{error.message}</div>
+		}
+	
+		// if data is fetched then it will return data
+		return (
+			<>
+				{data?.data.map(post => (
+					<div key={post.id}>
+						<h3>{post.title}</h3>
+						<p>{post.body}</p>
+					</div>
+				))}
+			</>
+		);
+	}
+

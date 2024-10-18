@@ -1,0 +1,31 @@
+// 5. useQuery on click
+	***** Usecase : To fetch data manually when user event happens (like button click)
+	
+	
+	=> Since we know that react-query makes network request & fetch data on UI when we visits then page,
+	   so to apply useQuery on Click first we need to disabled the automatic refetching
+	=> To disable automatic refetching we have to use property "enabled"
+	=> enabled : here we have to set this property false so that new network request will not make automatically & data will not fetch
+	
+	
+	=> react-query provides another flag (refetch):
+		=> refetch : when any event will happen it will trigger refetch & it will make new network request
+		
+		
+	### example: 
+	const { data, isLoading, isError, error, isFetching, refetch } = useQuery({
+		queryKey: ["posts"],
+		queryFn: return axios.get("http://localhost:4000/posts"),
+	})
+	
+	return (
+		<>
+			{data?.data.map(post => (
+				<div key={post.id}>
+					<h3>{post.title}</h3>
+					<p>{post.body}</p>
+				</div>
+			))}
+			<button onClick={refetch}>Fetch Posts</button>
+		</>
+	);

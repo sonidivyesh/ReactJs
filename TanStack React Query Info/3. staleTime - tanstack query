@@ -1,0 +1,27 @@
+// 3. Stale time
+	***** Usecase : We can reduce number of network request for cached data by configuring staleTime
+	
+	
+	=> In previous concept "query cache" we saw within 5 minutes if same page loads again then it makes isLoading state = false
+	=> but it always makes background network request everytime user hits the same page 
+	=> ex: posts // 1st time network request made when user visits page
+		   posts // 2nd time network request made when user re-visits
+		   posts // 3rd time network request made when user re-visits
+		   
+	=> we can check this in react-query developer tool that data for quueryKey ["posts"] always in Stale or outdated mode
+	=> This happens because react-query always assumes that data is in outdated mode or we can say it assumes data is still fetching even though data is fetched completely.
+	
+	
+	=> To prevent this react-query provides property "staleTime"
+	=> staleTime : here we mention time in milliseconds to tell react-query how long it has to keep data in Fresh mode & not to make new network request
+	
+
+	### example: 
+	const { data, isLoading, isError, error, isFetching } = useQuery({
+		queryKey: ["posts"],
+		queryFn: return axios.get("http://localhost:4000/posts"),
+		staleTime: 30000 // 30seconds 
+	})
+	
+	=> now react-query will keep data in Fresh mode for 30 seconds and won't make new network request again even though data is changed on server.
+	=> after 30 seconds it will again put data into Stale mode & if user re-visits same page again then it will make new network request & updates UI with new data & now again it will put data into Fresh mode for next 30 seconds

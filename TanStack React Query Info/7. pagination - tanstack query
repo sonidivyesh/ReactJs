@@ -1,0 +1,124 @@
+// 7. Pagination
+	***** Usecase : Handles pagination easily
+	
+	
+	=> This is out json data of fruits
+	{
+		"fruits": [
+			{ "id": "1", "name": "Apple" },
+			{ "id": "2", "name": "Banana" },
+			{ "id": "3", "name": "Orange" },
+			{ "id": "4", "name": "Strawberry" },
+			{ "id": "5", "name": "Mango" },
+			{ "id": "6", "name": "Pineapple" },
+			{ "id": "7", "name": "Grapes" },
+			{ "id": "8", "name": "Watermelon" },
+			{ "id": "9", "name": "Blueberry" },
+			{ "id": "10", "name": "Cherry" },
+			{ "id": "11", "name": "Peach" },
+			{ "id": "12", "name": "Plum" },
+			{ "id": "13", "name": "Kiwi" },
+			{ "id": "14", "name": "Papaya" },
+			{ "id": "15", "name": "Pomegranate" },
+			{ "id": "16", "name": "Lemon" },
+			{ "id": "17", "name": "Coconut" },
+			{ "id": "18", "name": "Pear" },
+			{ "id": "19", "name": "Guava" },
+			{ "id": "20", "name": "Lychee" },
+		],
+		"totalItems": 20
+	}
+	
+	
+	=> Make sure your API gives totalItems
+	
+	
+	=> we want to fetch this data & want to apply Pagination to it
+	=> we have to remember syntax for API end path (`.../?_limit=${limit}&_page=${pageId}`)
+	
+	
+	
+	### example 
+	import { useQuery } from '@tanstack/react-query'
+	import axios from 'axios'
+	import React, { useState } from 'react'
+
+	// Function to fetch fruits with pagination and limit
+	const fetchFruits = (pageId, limit) => {
+		return axios.get(`http://localhost:4000/fruits/?_limit=${limit}&_page=${pageId}`);
+	}
+
+	export default function PaginatedQueries() {
+		// States for current page and limit
+		const [page, setPage] = useState(1); // default page 1
+		const [limit, setLimit] = useState(5); // default limit 5
+
+		// React Query for fetching paginated data
+		const { data, isLoading, isError, error } = useQuery({
+			queryKey: ["fruits", page, limit],  // page and limit in queryKey
+			queryFn: () => fetchFruits(page, limit),
+			keepPreviousData: true,  // keeps previous data while loading new data
+		});
+
+		// Calculate total pages from the response body
+		const totalItems = data?.data.totalItems; // now fetching totalItems from the JSON body
+		const totalPages = totalItems ? Math.ceil(totalItems / limit) : 0;
+
+		// Loading state
+		if (isLoading) {
+			return <h2>Page is Loading...</h2>;
+		}
+
+		// Error state
+		if (isError) {
+			return <h1>{error.message}</h1>;
+		}
+
+		return (
+			<>
+				<div>
+					{/* Display fruits */}
+					{data?.data.map(item => (
+						<div key={item.id}>
+							{item.name}
+						</div>
+					))}
+
+					{/* Pagination buttons */}
+					<div>
+						<button onClick={() => setPage(prev => Math.max(prev - 1, 1))} disabled={page === 1}>Prev Page</button>
+						<button onClick={() => setPage(prev => Math.min(prev + 1, totalPages))} disabled={page === totalPages}>Next Page</button>
+					</div>
+
+					{/* Dropdown to select limit */}
+					<div>
+						<label htmlFor="limit">Items per page: </label>
+						<select
+							id="limit"
+							value={limit}
+							onChange={(e) => {
+								setLimit(Number(e.target.value));
+								setPage(1);  // Reset to page 1 when limit changes
+							}}
+						>
+							<option value="5">5</option>
+							<option value="10">10</option>
+							<option value="15">15</option>
+							<option value="20">20</option>
+							<option value="25">25</option>
+						</select>
+					</div>
+
+					{/* Page display */}
+					<div>Page {page} out of {totalPages}</div>
+				</div>
+			</>
+		);
+	}
+
+
+	=> keepPreviousData: true 
+		=> This option keeps the previous page's data visible while new data is being fetched.
+		=> It prevents the UI from immediately showing a loading state when the page or queryKey changes.
+		=> This is useful for paginated queries or when switching between different sets of data.
+		=> The old data stays in place until the new data is successfully fetched.

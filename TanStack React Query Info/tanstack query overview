@@ -1,0 +1,53 @@
+// tanstack react query overview
+
+• no need of hooks like useState or useEffect to fetch data.
+• no need to handle async operations manually by putting async & await.
+• short lines of code & extremely powerful than traditionaal methods
+
+
+
+
+install query => npm i @tanstack/react-query
+install devtools => npm i @tanstack/react-query-devtools
+
+
+
+
+==> In main.tsx add QueryClient, QueryClientProvider, ReactQueryDevtools & wrap router 
+
+import "./index.css";
+import { StrictMode } from "react";
+import ReactDOM from "react-dom/client";
+import { RouterProvider, createRouter } from "@tanstack/react-router";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+
+// Import the generated route tree
+import { routeTree } from "./routeTree.gen";
+
+// Create a new instance of query
+const queryClient = new QueryClient()
+
+// Create a new router instance
+const router = createRouter({ routeTree, context: { queryClient } }); // pass the context of queryClient
+
+// Register the router instance for type safety
+declare module "@tanstack/react-router" {
+  interface Register {
+    router: typeof router;
+  }
+}
+
+// Render the app
+const rootElement = document.getElementById("root")!;
+if (!rootElement.innerHTML) {
+  const root = ReactDOM.createRoot(rootElement);
+  root.render(
+    <StrictMode>
+		<QueryClientProvider client={queryClient}> // wrap the router
+			<RouterProvider router={router} />
+			<ReactQueryDevtools initialIsOpen={false} /> // add react query devtools & set it initally open false
+		<QueryClientProvider />
+    </StrictMode>
+  );
+}

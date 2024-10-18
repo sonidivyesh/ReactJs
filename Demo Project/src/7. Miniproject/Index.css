@@ -1,0 +1,156 @@
+li{
+    list-style: none;
+}
+
+.index{
+    position: relative;
+}
+
+.text-limit-1 {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    text-align: justify;
+}
+
+.text-limit-2 {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    text-align: justify;
+}
+
+/* ============================== Header ============================== */
+.header{
+    background-color: #161717;
+    min-height: 6rem;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.header_logo{
+    width: 10%;
+    color: #fff;
+}
+
+.main_menu{
+    width: 40%;
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    gap: 5%;
+    align-items: center;
+    font-size: 20px;
+    font-weight: 400;
+}
+
+.main_menu li:hover{
+    color: lightblue;
+    cursor: pointer;
+}
+
+.header_searchbar{
+    width: 15%;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.header_searchbar input:focus{
+    box-shadow: none;
+}
+
+.search_input{
+    position: absolute;
+    padding-left: 30px !important;
+    padding-right: 20px !important;
+}
+
+.header_search_icon{
+    position: absolute;
+    left: 5px;
+    margin-top: -4px;
+}
+
+/* ============================== Footer ============================== */
+.footer{
+    background-color: #161717;
+    position: absolute;
+    width: 100%;
+}
+
+.footer .sec1{
+    min-height: 10rem;
+    display: flex;
+    justify-content: space-around;
+    padding: 50px 0px;
+}
+
+.footer .sec1 .footer_logo{
+    width: 20%;
+    color: #fff;
+}
+
+.footer .sec1 .footer_menu{
+    width: 20%;
+    color: #fff;
+}
+
+.footer .sec1 .footer_menu .footer_menu_list{
+    font-size: 20px;
+    font-weight: 400;
+}
+
+.footer .sec1 .footer_menu .footer_menu_list li:hover{
+    color: lightblue;
+    cursor: pointer;
+}
+
+.footer .sec1 .subscribe{
+    width: 20%;
+    color: #fff;
+}
+
+.footer .sec1 .subscribe input:focus{
+    box-shadow: none;
+}
+
+.footer .sec1 .subscribe button{
+    margin-top: 5px;
+}
+
+.footer .sec2{
+    color: #fff;
+    display: grid;
+    place-content: center;
+}
+
+.footer .sec2 hr{
+    margin: 0px;
+}
+
+.footer .sec2 h6{
+    padding: 20px 0px;
+    font-weight: 400;
+}
+
+/* ============================== Body ============================== */
+.body{
+    padding: 50px 80px;
+}
+
+.body h2{
+    text-align: center;
+}
+
+.body .grid{
+    padding-top: 40px;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-gap: 30px;
+    justify-items: center;
+}
+

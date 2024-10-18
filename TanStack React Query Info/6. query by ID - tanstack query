@@ -1,0 +1,71 @@
+// 6. Query by id
+	***** Usecase : To get into details page of any posts (ex: '/posts/{postId}')
+	
+	
+	=> first create postdetails page 
+	
+	
+	### example: 
+	// on posts page
+	return (
+        <>
+            {data?.data.map(post => (
+                <Link key={post.id} to={`/posts/${post.id}`}>
+                    <div key={post.id}>
+                        <h3>{post.title}</h3>
+                        <p>{post.body}</p>
+                    </div>
+                </Link>
+            ))}
+            <button onClick={refetch}>Fetch Posts</button>
+        </>
+    );
+	
+	
+	// on postDetails page
+	import { useQuery } from "@tanstack/react-query"
+	import axios from "axios"
+	import { useParams } from "react-router-dom"
+
+	const fetchPostDetails = (postId) => {
+		return axios.get(`http://localhost:4000/posts/${postId}`);
+	}
+
+	export default function PostDetailsRQ() {
+
+		const { postId } = useParams()
+
+		const { data, isLoading, isError, error } = useQuery({
+			queryKey: ["posts", postId],
+			queryFn: () => fetchPostDetails(postId)
+		})
+
+		if (isLoading) {
+			return <div>Page is loading...</div>
+		}
+
+		if (isError) {
+			return <div>{error.message}</div>
+		}
+
+		const { title, body } = data?.data || {};
+
+
+		return (
+			<>
+				<div>{title}</div>
+				<div>{body}</div>
+			</>
+		)
+	}
+	
+	
+	=> now on postDetails page if 2nd post is open then queryKey will be like this => ["posts", "2"] => url : /posts/2
+					similarly if 3rd  post is open then queryKey will be like this => ["posts", "3"] => url : /posts/3
+					
+					
+	=> so now data of 2nd & 3rd posts will be cached for 5 minutes as it's postDetails is opened
+	=> so now react-query will have cache of 3 different queryKey as below
+		1. ["posts"]
+		2. ["posts", "2"]
+		3. ["posts", "3"]
