@@ -1,0 +1,13 @@
+.best-selling-product-table table caption,
+.best-selling-category-table table caption {
+  display: none !important;
+}
+
+.best-selling-category-table table thead tr th {
+  height: 2.5rem;
+}
+
+.best-selling-category-table table tbody tr td {
+  padding-top: 0.625rem;
+  padding-bottom: 0.625rem;
+}
